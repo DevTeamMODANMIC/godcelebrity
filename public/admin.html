@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — God's Celebrities</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Admin page layout ── */
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .admin-topbar {
+      background: rgba(10,14,26,0.98);
+      border-bottom: 1px solid rgba(201,168,76,0.18);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-topbar-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-decoration: none;
+    }
+    .admin-topbar-logo span { color: var(--text-light); }
+    .admin-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .admin-topbar-status {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+    .topbar-btn {
+      padding: 0.4rem 1rem;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .topbar-btn-signout {
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold);
+    }
+    .topbar-btn-signout:hover { background: rgba(201,168,76,0.15); }
+    .topbar-btn-home {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .topbar-btn-home:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+
+    /* ── Page body ── */
+    .admin-page-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    /* ── Login card ── */
+    #login-screen {
+      width: 100%;
+      max-width: 480px;
+      margin: 4vh auto 0;
+    }
+    .login-card {
+      background: rgba(201,168,76,0.03);
+      border: 1px solid rgba(201,168,76,0.15);
+      padding: 2.8rem 2.5rem;
+    }
+    .login-card-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 0.25rem 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+    .login-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--ivory);
+      margin-bottom: 0.4rem;
+    }
+    .login-card p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    #login-error {
+      color: #C9544C;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      min-height: 1.2em;
+    }
+    .pass-field { position: relative; }
+    .pass-field input { padding-right: 2.8rem !important; }
+    .pass-toggle {
+      position: absolute;
+      right: 0.75rem; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--text-muted);
+      cursor: pointer; font-size: 1rem;
+      line-height: 1;
+    }
+    .login-submit-btn {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.9rem 1.5rem;
+      background: var(--gold);
+      border: none;
+      color: var(--navy);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.15s;
+    }
+    .login-submit-btn:hover   { background: var(--gold-light); }
+    .login-submit-btn:active  { transform: scale(0.98); }
+    .login-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ── Dashboard ── */
+    #dashboard-screen {
+      display: none;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .dashboard-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .dashboard-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--ivory);
+    }
+    .dashboard-title span { color: var(--gold); }
+
+    /* Tabs scroll on mobile */
+    #admin-tabs {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 0.25rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+      display: flex;
+      gap: 0;
+    }
+    #admin-tabs::-webkit-scrollbar { height: 3px; }
+    #admin-tabs::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.2); }
+
+    /* Cloudinary dropzone */
+    #gallery-dropzone:hover,
+    #gallery-dropzone.drag-over {
+      border-color: rgba(201,168,76,0.6);
+      background: rgba(201,168,76,0.06);
+    }
+    #gallery-dropzone.drag-over #dropzone-icon { opacity: 0.9; transform: scale(1.1); }
+    #gallery-dropzone.uploading { pointer-events: none; opacity: 0.7; }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Bar ── -->
+<div class="admin-topbar">
+  <a href="index.html" class="admin-topbar-logo">God <span>Celebrities</span></a>
+  <div class="admin-topbar-right">
+    <span class="admin-topbar-status" id="admin-status"></span>
+    <button id="error-log-trigger" class="error-log-trigger-btn topbar-btn" onclick="openErrorLog()" style="display:none;">⚠ Errors</button>
+    <button id="admin-signout-btn" class="topbar-btn topbar-btn-signout" onclick="adminLogout()" style="display:none;">Sign Out</button>
+    <a href="index.html" class="topbar-btn topbar-btn-home">← Back to Site</a>
+  </div>
+</div>
+
+<div class="admin-page-body">
+
+  <!-- ══════════════════════════════════
+       LOGIN SCREEN
+  ══════════════════════════════════ -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-card-badge">✦ Restricted Access</div>
+      <h2>Admin Sign In</h2>
+      <p class="subtitle">Sign in to manage God's Celebrities content — celebrities, gallery, announcements, and more.</p>
+
+      <div id="login-error"></div>
+
+      <div class="admin-form-group">
+        <label>Email Address</label>
+        <input type="email" id="admin-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter') adminLogin()">
+      </div>
+
+      <div class="admin-form-group">
+        <label>Password</label>
+        <div class="pass-field">
+          <input type="password" id="admin-pass" placeholder="Password" onkeydown="if(event.key==='Enter') adminLogin()">
+          <button class="pass-toggle" onclick="toggleLoginPassVisibility()" id="login-toggle-pass" title="Show/hide password">👁</button>
+        </div>
+      </div>
+
+      <button class="login-submit-btn" id="login-btn" onclick="adminLogin()">Sign In →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       DASHBOARD SCREEN
+  ══════════════════════════════════ -->
+  <div id="dashboard-screen">
+    <div class="dashboard-title-row">
+      <h1 class="dashboard-title">✦ Admin <span>Dashboard</span></h1>
+    </div>
+
+    <!-- Tabs -->
+    <div id="admin-tabs">
+      <button class="admin-tab active"  onclick="switchTab('celebrities')">Celebrities</button>
+      <button class="admin-tab"         onclick="switchTab('testimonies-admin')">Testimonies</button>
+      <button class="admin-tab"         onclick="switchTab('gallery-admin')">Gallery</button>
+      <button class="admin-tab"         onclick="switchTab('announcements-admin')">Announcements</button>
+      <button class="admin-tab"         onclick="switchTab('books-admin')">Books / PDF</button>
+      <button class="admin-tab"         onclick="switchTab('admin-users')">Admin Users</button>
+      <button class="admin-tab"         onclick="switchTab('settings')">Settings</button>
+    </div>
+
+    <!-- ── CELEBRITIES ── -->
+    <div class="admin-panel active" id="panel-celebrities">
+      <h3 id="celeb-form-title" class="admin-section-title">Add New Celebrity</h3>
+      <input type="hidden" id="celeb-edit-id">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="admin-form-group">
+          <label>Name</label>
+          <input type="text" id="celeb-name" placeholder="e.g. Esther">
+        </div>
+        <div class="admin-form-group">
+          <label>Title / Role</label>
+          <input type="text" id="celeb-title" placeholder="e.g. The Queen of Courage">
+        </div>
+        <div class="admin-form-group">
+          <label>Scripture Reference</label>
+          <input type="text" id="celeb-scripture" placeholder="e.g. Esther 4:14">
+        </div>
+        <div class="admin-form-group">
+          <label>Sphere of Influence</label>
+          <select id="celeb-sphere">
+            <option>Ministry</option>
+            <option>Government &amp; Leadership</option>
+            <option>Home &amp; Family</option>
+            <option>Business</option>
+            <option>Arts &amp; Culture</option>
+            <option>Education</option>
+            <option>Deliverance &amp; Power</option>
+          </select>
+        </div>
+      </div>
+      <div class="admin-form-group">
+        <label>Story / Description</label>
+        <textarea id="celeb-story" rows="4" placeholder="Share their story and lessons..."></textarea>
+      </div>
+      <button class="save-btn"  onclick="saveCeleb()">Save Celebrity</button>
+      <button class="clear-btn" onclick="clearCelebForm()">Clear Form</button>
+      <h3 class="admin-section-title" style="margin-top:2rem;">Existing Celebrities</h3>
+      <div id="admin-celeb-list"></div>
+    </div>
+
+    <!-- ── TESTIMONIES ── -->
+    <div class="admin-panel" id="panel-testimonies-admin">
+      <h3 class="admin-section-title">Submitted Testimonies</h3>
+      <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.7;margin-bottom:1.2rem;">
+        Review and approve testimonies before they appear on the public testimonies page. Click <strong style="color:var(--gold);">Preview</strong> to read the full testimony including any attached media.
+      </p>
+      <div style="display:flex;gap:0.5rem;margin-bottom:1.2rem;flex-wrap:wrap;">
+        <button onclick="filterTestimonies('pending')"   class="t-filter-btn active" id="tfbtn-pending">⏳ Pending</button>
+        <button onclick="filterTestimonies('approved')"  class="t-filter-btn"        id="tfbtn-approved">✓ Approved</button>
+        <button onclick="filterTestimonies('all')"       class="t-filter-btn"        id="tfbtn-all">All</button>
+      </div>
+      <div id="admin-testimony-list"></div>
+    </div>
+
+    <!-- ── BOOKS / PDF ── -->
+    <div class="admin-panel" id="panel-books-admin">
+      <h3 class="admin-section-title">Add Book / PDF</h3>
+      <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.7;margin-bottom:1.5rem;">
+        Upload PDF books or resources. Set them as free (users download directly) or paid (users see a payment link or contact info).
+      </p>
+      <input type="hidden" id="book-edit-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="admin-form-group">
+          <label>Book Title</label>
+          <input type="text" id="book-title" placeholder="e.g. God's Celebrities Volume 1">
+        </div>
+        <div class="admin-form-group">
+          <label>Author</label>
+          <input type="text" id="book-author" placeholder="e.g. Ambassador Eden Chinyere">
+        </div>
+        <div class="admin-form-group">
+          <label>Access Type</label>
+          <select id="book-access" onchange="toggleBookPayment()">
+            <option value="free">Free Download</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+        <div class="admin-form-group" id="book-price-group" style="display:none;">
+          <label>Price / Payment Info</label>
+          <input type="text" id="book-price" placeholder="e.g. $9.99 — or payment link">
+        </div>
+        <div class="admin-form-group" style="grid-column:span 2;">
+          <label>Description</label>
+          <textarea id="book-desc" rows="2" placeholder="Brief description of the book..."></textarea>
+        </div>
+      </div>
+
+      <!-- Cover Image Upload -->
+      <div class="admin-form-group" style="margin-top:0.5rem;">
+        <label style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.4rem;">
+          <span>Cover Image <span style="font-weight:400;opacity:0.6;font-size:0.8rem;">(optional)</span></span>
+          <span style="font-size:0.72rem;color:var(--text-muted);">Uploaded via Cloudinary · JPG / PNG / WEBP</span>
+        </label>
+
+        <!-- Drop zone -->
+        <div id="book-cover-dropzone"
+          onclick="document.getElementById('book-cover-file-input').click()"
+          ondragover="event.preventDefault();this.classList.add('t-drag-over')"
+          ondragleave="this.classList.remove('t-drag-over')"
+          ondrop="handleBookCoverDrop(event)"
+          style="position:relative;border:1px dashed rgba(201,168,76,0.25);background:rgba(201,168,76,0.03);padding:0;min-height:120px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;overflow:hidden;">
+          <!-- Thumbnail preview (hidden until image chosen) -->
+          <img id="book-cover-thumb"
+            style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55;pointer-events:none;">
+          <!-- Inner prompt (hidden once image chosen) -->
+          <div id="book-cover-prompt" style="position:relative;z-index:1;text-align:center;padding:1.5rem;">
+            <div style="font-size:1.8rem;margin-bottom:0.4rem;opacity:0.4;">🖼</div>
+            <p style="font-size:0.85rem;color:var(--text-muted);">Drag &amp; drop image or click to browse</p>
+            <p style="font-size:0.72rem;color:var(--text-muted);opacity:0.6;margin-top:0.25rem;">Max 10 MB · JPG, PNG, WEBP</p>
+          </div>
+          <input type="file" id="book-cover-file-input" accept="image/jpeg,image/png,image/webp,image/*" style="display:none;" onchange="handleBookCoverSelect(event)">
+        </div>
+
+        <!-- Progress bar -->
+        <div id="book-cover-progress" style="display:none;margin-top:0.75rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+            <span id="book-cover-filename" style="font-size:0.8rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%;"></span>
+            <span id="book-cover-pct" style="font-size:0.8rem;color:var(--gold);font-weight:600;">0%</span>
+          </div>
+          <div style="height:4px;background:rgba(201,168,76,0.1);border-radius:2px;overflow:hidden;">
+            <div id="book-cover-bar" style="height:100%;width:0%;background:var(--gold);transition:width 0.3s;border-radius:2px;"></div>
+          </div>
+        </div>
+
+        <!-- Status text -->
+        <div id="book-cover-status" style="margin-top:0.5rem;font-size:0.82rem;"></div>
+
+        <!-- Remove button (shown after image set) -->
+        <button id="book-cover-clear-btn"
+          onclick="clearBookCover()"
+          style="display:none;margin-top:0.35rem;background:none;border:none;color:#C9544C;cursor:pointer;font-size:0.78rem;text-decoration:underline;padding:0;">
+          ✕ Remove cover image
+        </button>
+
+        <!-- Hidden field read by saveBook() -->
+        <input type="hidden" id="book-cover">
+
+        <!-- URL fallback -->
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.3rem;">Or paste an image URL directly:</p>
+        <input type="text" id="book-cover-url-input"
+          placeholder="https://example.com/cover.jpg"
+          oninput="onBookCoverUrlInput(this.value)"
+          style="width:100%;">
+      </div>
+
+      <!-- PDF Upload -->
+      <div class="admin-form-group" style="margin-top:0.25rem;">
+        <label style="display:flex;align-items:center;justify-content:space-between;">
+          <span>PDF File</span>
+          <span style="font-size:0.72rem;color:var(--text-muted);">Uploaded via Cloudinary</span>
+        </label>
+        <div id="book-pdf-dropzone"
+          onclick="document.getElementById('book-pdf-input').click()"
+          ondragover="event.preventDefault();this.classList.add('t-drag-over')"
+          ondragleave="this.classList.remove('t-drag-over')"
+          ondrop="handleBookPdfDrop(event)"
+          class="testimony-dropzone" style="padding:1.5rem;">
+          <div style="font-size:1.8rem;margin-bottom:0.4rem;opacity:0.4;">📄</div>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Drag & drop PDF or click to browse</p>
+          <input type="file" id="book-pdf-input" accept="application/pdf" style="display:none;" onchange="handleBookPdfSelect(event)">
+        </div>
+        <div id="book-pdf-progress" style="display:none;margin-top:0.75rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+            <span id="book-pdf-filename" style="font-size:0.8rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%;"></span>
+            <span id="book-pdf-pct" style="font-size:0.8rem;color:var(--gold);font-weight:600;">0%</span>
+          </div>
+          <div style="height:4px;background:rgba(201,168,76,0.1);border-radius:2px;overflow:hidden;">
+            <div id="book-pdf-bar" style="height:100%;width:0%;background:var(--gold);transition:width 0.3s;border-radius:2px;"></div>
+          </div>
+        </div>
+        <div id="book-pdf-status" style="margin-top:0.5rem;font-size:0.82rem;"></div>
+        <input type="hidden" id="book-pdf-url">
+        <!-- Or paste URL directly -->
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.6rem;">Or paste a direct PDF URL:</p>
+        <input type="text" id="book-pdf-url-input" placeholder="https://example.com/book.pdf"
+          oninput="document.getElementById('book-pdf-url').value=this.value;document.getElementById('book-pdf-status').textContent=this.value?'✓ URL set':'';document.getElementById('book-pdf-status').style.color='#7BC94C';"
+          style="width:100%;margin-top:0.3rem;">
+      </div>
+
+      <div id="book-form-error"   style="color:#C9544C;font-size:0.85rem;margin:0.5rem 0;display:none;"></div>
+      <div id="book-form-success" style="color:#7BC94C;font-size:0.85rem;margin:0.5rem 0;display:none;"></div>
+      <button class="save-btn" onclick="saveBook()">Save Book</button>
+      <button class="clear-btn" onclick="clearBookForm()">Clear Form</button>
+
+      <h3 class="admin-section-title" style="margin-top:2rem;">Published Books</h3>
+      <div id="admin-books-list"></div>
+    </div>
+
+    <!-- ── GALLERY ── -->
+    <div class="admin-panel" id="panel-gallery-admin">
+      <h3 class="admin-section-title">Add Gallery Event</h3>
+      <input type="hidden" id="gallery-edit-id">
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="admin-form-group">
+          <label>Event Title</label>
+          <input type="text" id="gallery-title" placeholder="e.g. Annual Conference 2025">
+        </div>
+        <div class="admin-form-group">
+          <label>Event Date</label>
+          <input type="date" id="gallery-date">
+        </div>
+        <div class="admin-form-group" style="grid-column:span 2;">
+          <label>Description</label>
+          <textarea id="gallery-desc" rows="3" placeholder="Brief description of the event..."></textarea>
+        </div>
+      </div>
+
+      <!-- ── MULTI-IMAGE SECTION ── -->
+      <div class="admin-form-group" style="margin-top:0.5rem;">
+        <label style="display:flex; align-items:center; justify-content:space-between;">
+          <span>Event Images</span>
+          <button onclick="addImageEntry()" style="background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.3); color:var(--gold); padding:0.3rem 0.9rem; font-family:'Jost',sans-serif; font-size:0.72rem; letter-spacing:0.1em; cursor:pointer; border-radius:2px;">+ Add Image</button>
+        </label>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.75rem; margin-top:0.25rem;">Add one or more images for this event. Drag to reorder. Each entry accepts a URL or an uploaded file.</p>
+
+        <!-- Image entries list -->
+        <div id="gallery-images-list" style="display:flex; flex-direction:column; gap:0.75rem; margin-bottom:0.75rem;"></div>
+
+        <!-- Empty state -->
+        <div id="gallery-images-empty" style="border:2px dashed rgba(201,168,76,0.15); padding:1.5rem; text-align:center; color:var(--text-muted); font-size:0.85rem;">
+          No images added yet. Click <strong style="color:var(--gold);">+ Add Image</strong> above to start.
+        </div>
+      </div>
+
+      <div id="gallery-form-error"   style="color:#C9544C; font-size:0.85rem; margin:0.5rem 0; display:none;"></div>
+      <div id="gallery-form-success" style="color:#7BC94C; font-size:0.85rem; margin:0.5rem 0; display:none;"></div>
+
+      <button class="save-btn"  onclick="saveGalleryEvent()">Save Event</button>
+      <button class="clear-btn" onclick="clearGalleryForm()">Clear Form</button>
+      <h3 class="admin-section-title" style="margin-top:2rem;">Existing Gallery Events</h3>
+      <div id="admin-gallery-list"></div>
+    </div>
+
+    <!-- ── ANNOUNCEMENTS ── -->
+    <div class="admin-panel" id="panel-announcements-admin">
+      <h3 class="admin-section-title">Add Announcement</h3>
+      <input type="hidden" id="ann-edit-id">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="admin-form-group">
+          <label>Title</label>
+          <input type="text" id="ann-title" placeholder="e.g. Upcoming Prayer Night">
+        </div>
+        <div class="admin-form-group">
+          <label>Date / Period</label>
+          <input type="text" id="ann-date" placeholder="e.g. March 28, 2025">
+        </div>
+        <div class="admin-form-group" style="grid-column:span 2;">
+          <label>Message</label>
+          <textarea id="ann-message" rows="4" placeholder="Full announcement details..."></textarea>
+        </div>
+        <div class="admin-form-group">
+          <label>Type</label>
+          <select id="ann-type">
+            <option>Event</option>
+            <option>Notice</option>
+            <option>Urgent</option>
+            <option>Praise Report</option>
+          </select>
+        </div>
+      </div>
+      <button class="save-btn"  onclick="saveAnnouncement()">Save Announcement</button>
+      <button class="clear-btn" onclick="clearAnnForm()">Clear Form</button>
+      <h3 class="admin-section-title" style="margin-top:2rem;">Existing Announcements</h3>
+      <div id="admin-ann-list"></div>
+    </div>
+
+    <!-- ── ADMIN USERS ── -->
+    <div class="admin-panel" id="panel-admin-users">
+      <h3 class="admin-section-title">Add New Admin User</h3>
+      <p style="color:var(--text-muted); font-size:0.88rem; line-height:1.7; margin-bottom:1.5rem;">
+        Create a new admin account. The new user will be able to sign in to this dashboard with the credentials you set below.
+      </p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="admin-form-group">
+          <label>Full Name</label>
+          <input type="text" id="new-admin-name" placeholder="e.g. John Doe">
+        </div>
+        <div class="admin-form-group">
+          <label>Role</label>
+          <select id="new-admin-role">
+            <option value="editor">Editor</option>
+            <option value="moderator">Moderator</option>
+            <option value="super-admin">Super Admin</option>
+          </select>
+        </div>
+        <div class="admin-form-group">
+          <label>Email Address</label>
+          <input type="email" id="new-admin-email" placeholder="admin@example.com">
+        </div>
+        <div class="admin-form-group">
+          <label>Password</label>
+          <div style="position:relative;">
+            <input type="password" id="new-admin-pass" placeholder="Min. 6 characters" style="padding-right:2.8rem;">
+            <button onclick="toggleNewPassVisibility()" style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;" id="toggle-pass-btn">👁</button>
+          </div>
+        </div>
+        <div class="admin-form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="new-admin-pass-confirm" placeholder="Repeat password">
+        </div>
+      </div>
+      <div id="new-admin-error"   style="color:#C9544C;font-size:0.85rem;margin:0.5rem 0;display:none;"></div>
+      <div id="new-admin-success" style="color:#7BC94C;font-size:0.85rem;margin:0.5rem 0;display:none;"></div>
+      <button class="save-btn" onclick="createAdminUser()">✦ Create Admin User</button>
+      <div style="border-top:1px solid rgba(201,168,76,0.12);margin:2.5rem 0;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 class="admin-section-title" style="margin:0;">Existing Admin Users</h3>
+        <button class="clear-btn" onclick="loadAdminUsers()" style="margin:0;">↻ Refresh</button>
+      </div>
+      <p style="color:var(--text-muted);font-size:0.82rem;line-height:1.6;margin-bottom:1.2rem;">
+        ⚠ To fully delete a Firebase Auth account, use your Firebase Console → Authentication → Users.
+      </p>
+      <div id="admin-users-list">
+        <div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.9rem;">Loading…</div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="admin-panel" id="panel-settings">
+      <h3 class="admin-section-title">Firebase Configuration</h3>
+      <p style="color:var(--text-muted);line-height:1.8;margin-bottom:1.5rem;">
+        Replace the placeholder values in <strong style="color:var(--gold)">firebase.js</strong> with your own Firebase project credentials to activate live data.
+      </p>
+      <div style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);padding:1.5rem;">
+        <pre style="font-family:monospace;font-size:0.85rem;color:var(--gold);line-height:2;white-space:pre-wrap;">
+apiKey:            "YOUR_API_KEY"
+authDomain:        "YOUR_PROJECT.firebaseapp.com"
+projectId:         "YOUR_PROJECT_ID"
+storageBucket:     "YOUR_PROJECT.appspot.com"
+messagingSenderId: "YOUR_SENDER_ID"
+appId:             "YOUR_APP_ID"</pre>
+      </div>
+      <p style="color:var(--text-muted);margin-top:1.5rem;font-size:0.9rem;">
+        Enable <strong style="color:var(--gold)">Firestore Database</strong> and
+        <strong style="color:var(--gold)">Authentication (Email/Password)</strong> in your Firebase console,
+        then create your first admin user.
+      </p>
+    </div>
+
+  </div><!-- /dashboard-screen -->
+
+</div><!-- /admin-page-body -->
+
+<!-- ══════════════════════════════════
+     ERROR LOG OVERLAY
+══════════════════════════════════ -->
+<!-- TESTIMONY PREVIEW POPUP -->
+<div id="t-preview-overlay" onclick="if(event.target===this) closeTPreview()">
+  <div class="t-preview-card">
+    <button class="popup-close-btn" onclick="closeTPreview()">✕</button>
+    <div class="t-preview-meta">
+      <span class="t-preview-name" id="tp-name"></span>
+      <span class="t-preview-date" id="tp-date"></span>
+      <span class="t-preview-status" id="tp-status"></span>
+    </div>
+    <div class="ann-popup-divider"></div>
+    <p class="t-preview-message" id="tp-message"></p>
+    <div id="tp-media-wrap" style="margin-top:1.5rem;"></div>
+    <div class="t-preview-actions" id="tp-actions"></div>
+  </div>
+</div>
+
+<div id="error-log-overlay">
+  <div class="error-log-wrapper">
+    <div class="error-log-header">
+      <div class="error-log-title-row">
+        <div>
+          <div class="error-log-badge">⚠ System Alert</div>
+          <h2 class="error-log-title">Error Log</h2>
+        </div>
+        <button class="error-log-close" onclick="closeErrorLog()">✕</button>
+      </div>
+      <p class="error-log-subtitle">The following errors were detected. Review, retry, or contact your developer.</p>
+      <div class="error-log-actions">
+        <button class="error-log-btn-clear" onclick="clearErrorLog()">🗑 Clear All</button>
+        <button class="error-log-btn-copy"  onclick="copyErrorLog()">📋 Copy Log</button>
+        <button class="error-log-btn-retry" onclick="retryLastAction()">↺ Retry</button>
+      </div>
+    </div>
+    <div id="error-log-entries"></div>
+    <div class="error-log-footer">
+      <span id="error-log-count">0 errors</span>
+      <span id="error-log-copy-confirm" style="color:#7BC94C;display:none;">✦ Copied!</span>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+
+<!-- Define auth page callbacks BEFORE firebase.js loads so onAuthStateChanged can find them -->
+<script>
+  window._adminPageShowDashboard = function(email) {
+    document.getElementById('login-screen').style.display     = 'none';
+    document.getElementById('dashboard-screen').style.display = 'block';
+    document.getElementById('admin-status').textContent       = 'Signed in: ' + email;
+    document.getElementById('admin-signout-btn').style.display = 'inline-block';
+  };
+  window._adminPageShowLogin = function() {
+    document.getElementById('login-screen').style.display     = 'block';
+    document.getElementById('dashboard-screen').style.display = 'none';
+    document.getElementById('admin-status').textContent       = '';
+    document.getElementById('admin-signout-btn').style.display = 'none';
+  };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if(window.closeErrorLog) window.closeErrorLog(); } });
+</script>
+
+<script type="module" src="firebase.js"></script>
+
+<script>
+// ============================================================
+//  MULTI-IMAGE MANAGER  (admin.html — Gallery panel)
+// ============================================================
+
+const CLOUDINARY_CLOUD_NAME    = 'YOUR_CLOUD_NAME';
+const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UPLOAD_PRESET';
+const MAX_FILE_SIZE_MB = 10;
+
+let _imgEntryCount = 0;
+
+// Initialise with one empty entry on load
+document.addEventListener('DOMContentLoaded', () => {
+  addImageEntry();
+});
+
+// Add a new image entry row
+function addImageEntry(prefillUrl) {
+  const list  = document.getElementById('gallery-images-list');
+  const empty = document.getElementById('gallery-images-empty');
+  if (!list) return;
+  if (empty) empty.style.display = 'none';
+
+  const id  = ++_imgEntryCount;
+  const div = document.createElement('div');
+  div.className = 'gallery-img-entry';
+  div.id = 'img-entry-' + id;
+  div.innerHTML = `
+    <div class="gallery-img-entry-inner">
+      <div class="gallery-img-entry-thumb" id="thumb-${id}">
+        ${prefillUrl ? `<img src="${prefillUrl}" alt="preview">` : '<span style="opacity:0.3;font-size:1.2rem;">🖼</span>'}
+      </div>
+      <div class="gallery-img-entry-fields">
+        <input type="text" class="gallery-img-entry-url" id="imgurl-${id}"
+          placeholder="Paste image URL…"
+          value="${prefillUrl || ''}"
+          oninput="previewEntryUrl(${id}, this.value)">
+        <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.4rem;">
+          <label class="img-entry-upload-btn" style="cursor:pointer;">
+            <input type="file" accept="image/*" style="display:none;" onchange="uploadEntryFile(${id}, this)">
+            ↑ Upload
+          </label>
+          <span id="entry-status-${id}" style="font-size:0.75rem; color:var(--text-muted); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+        </div>
+      </div>
+      <button onclick="removeImageEntry(${id})" class="img-entry-remove-btn" title="Remove">✕</button>
+    </div>`;
+  list.appendChild(div);
+}
+window.addImageEntry = addImageEntry;
+
+// Remove an entry
+function removeImageEntry(id) {
+  const el = document.getElementById('img-entry-' + id);
+  if (el) el.remove();
+  const list = document.getElementById('gallery-images-list');
+  const empty = document.getElementById('gallery-images-empty');
+  if (list && empty && list.children.length === 0) empty.style.display = 'block';
+}
+window.removeImageEntry = removeImageEntry;
+
+// Preview from URL input
+function previewEntryUrl(id, url) {
+  const thumb = document.getElementById('thumb-' + id);
+  if (!thumb) return;
+  if (url.trim()) {
+    thumb.innerHTML = `<img src="${url.trim()}" alt="preview" onerror="this.parentElement.innerHTML='<span style=color:#C9544C;font-size:0.7rem;>Invalid URL</span>'">`;
+  } else {
+    thumb.innerHTML = '<span style="opacity:0.3;font-size:1.2rem;">🖼</span>';
+  }
+}
+window.previewEntryUrl = previewEntryUrl;
+
+// Upload file for an entry
+async function uploadEntryFile(id, input) {
+  const file    = input.files[0];
+  const statusEl = document.getElementById('entry-status-' + id);
+  const urlInput = document.getElementById('imgurl-' + id);
+  const thumb    = document.getElementById('thumb-' + id);
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) { if(statusEl) statusEl.textContent = '✗ Not an image'; return; }
+  if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) { if(statusEl) statusEl.textContent = `✗ Too large (max ${MAX_FILE_SIZE_MB}MB)`; return; }
+
+  if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME') {
+    // No Cloudinary — use local base64 preview
+    if(statusEl) { statusEl.style.color = '#C9844C'; statusEl.textContent = '⚠ Local preview (Cloudinary not configured)'; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      if(urlInput) urlInput.value = e.target.result;
+      if(thumb) thumb.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+
+  if(statusEl) { statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'Uploading…'; }
+  try {
+    const url = await uploadToCloudinary(file, pct => {
+      if(statusEl) statusEl.textContent = `Uploading… ${pct}%`;
+    });
+    if(urlInput) urlInput.value = url;
+    if(thumb)    thumb.innerHTML = `<img src="${url}" alt="preview">`;
+    if(statusEl) { statusEl.style.color = '#7BC94C'; statusEl.textContent = '✓ Uploaded'; }
+  } catch(e) {
+    if(statusEl) { statusEl.style.color = '#C9544C'; statusEl.textContent = '✗ ' + e.message; }
+    if(window.ErrorLog) window.ErrorLog.push(e, 'uploadEntryFile', e.stack||'');
+  }
+}
+window.uploadEntryFile = uploadEntryFile;
+
+// Rebuild entries list from a saved images array (used when editing)
+function rebuildImageEntries(imgs) {
+  const list  = document.getElementById('gallery-images-list');
+  const empty = document.getElementById('gallery-images-empty');
+  if (!list) return;
+  list.innerHTML = '';
+  _imgEntryCount  = 0;
+  if (!imgs || imgs.length === 0) {
+    if(empty) empty.style.display = 'block';
+    addImageEntry();
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+  imgs.forEach(url => addImageEntry(url));
+}
+window.rebuildImageEntries = rebuildImageEntries;
+
+// Cloudinary upload helper
+async function uploadToCloudinary(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
+    xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded/e.total*100)); };
+    xhr.onload  = () => {
+      const res = JSON.parse(xhr.responseText);
+      if (xhr.status === 200 && res.secure_url) resolve(res.secure_url);
+      else reject(new Error(res.error?.message || 'Upload failed'));
+    };
+    xhr.onerror = () => reject(new Error('Network error during upload'));
+    xhr.send(fd);
+  });
+}
+</script>
+<script>
+// ============================================================
+//  BOOKS PDF UPLOAD
+// ============================================================
+const BOOK_CLOUD_NAME    = 'dc4jk3xcn';
+const BOOK_UPLOAD_PRESET = 'borderlessbuy';
+
+// ============================================================
+//  BOOK COVER IMAGE UPLOAD
+// ============================================================
+function handleBookCoverDrop(e) {
+  e.preventDefault();
+  document.getElementById('book-cover-dropzone').classList.remove('t-drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processBookCover(file);
+}
+function handleBookCoverSelect(e) {
+  const file = e.target.files[0];
+  if (file) processBookCover(file);
+}
+window.handleBookCoverDrop   = handleBookCoverDrop;
+window.handleBookCoverSelect = handleBookCoverSelect;
+
+async function processBookCover(file) {
+  const statusEl = document.getElementById('book-cover-status');
+  const progEl   = document.getElementById('book-cover-progress');
+  statusEl.textContent = '';
+
+  // Validate type
+  if (!file.type.startsWith('image/')) {
+    statusEl.style.color = '#C9544C';
+    statusEl.textContent = '✗ Please select an image file (JPG, PNG or WEBP).';
+    return;
+  }
+
+  // Validate size (10 MB max)
+  if (file.size > 10 * 1024 * 1024) {
+    statusEl.style.color = '#C9544C';
+    statusEl.textContent = '✗ Image must be under 10 MB.';
+    return;
+  }
+
+  // Show progress bar
+  document.getElementById('book-cover-filename').textContent = file.name;
+  document.getElementById('book-cover-pct').textContent = '0%';
+  document.getElementById('book-cover-bar').style.width = '0%';
+  progEl.style.display = 'block';
+  statusEl.style.color = 'var(--gold)';
+  statusEl.textContent = 'Uploading…';
+
+  // Local preview immediately so the admin sees the image
+  const reader = new FileReader();
+  reader.onload = ev => showBookCoverThumb(ev.target.result);
+  reader.readAsDataURL(file);
+
+  // Upload to Cloudinary
+  try {
+    const url = await uploadToCloudinaryRaw(file, 'image', pct => {
+      document.getElementById('book-cover-pct').textContent = pct + '%';
+      document.getElementById('book-cover-bar').style.width  = pct + '%';
+    });
+    setTimeout(() => { progEl.style.display = 'none'; }, 1200);
+
+    // Store the public URL
+    document.getElementById('book-cover').value          = url;
+    document.getElementById('book-cover-url-input').value = url;
+    showBookCoverThumb(url);
+
+    statusEl.style.color = '#7BC94C';
+    statusEl.textContent = '✓ Cover uploaded: ' + file.name;
+    document.getElementById('book-cover-clear-btn').style.display = 'inline-block';
+
+  } catch (err) {
+    progEl.style.display = 'none';
+    statusEl.style.color = '#C9544C';
+    statusEl.textContent = '✗ Upload failed: ' + err.message;
+    if (window.ErrorLog) window.ErrorLog.push(err, 'bookCoverUpload', err.stack || '');
+  }
+}
+
+function showBookCoverThumb(src) {
+  const thumb  = document.getElementById('book-cover-thumb');
+  const prompt = document.getElementById('book-cover-prompt');
+  thumb.src = src;
+  thumb.style.display  = 'block';
+  prompt.style.display = 'none';
+  document.getElementById('book-cover-clear-btn').style.display = 'inline-block';
+}
+
+function onBookCoverUrlInput(value) {
+  document.getElementById('book-cover').value = value;
+  const statusEl = document.getElementById('book-cover-status');
+  if (value) {
+    showBookCoverThumb(value);
+    statusEl.style.color = '#7BC94C';
+    statusEl.textContent = '✓ URL set';
+  } else {
+    clearBookCover();
+  }
+}
+window.onBookCoverUrlInput = onBookCoverUrlInput;
+
+function clearBookCover() {
+  document.getElementById('book-cover').value           = '';
+  document.getElementById('book-cover-url-input').value = '';
+  document.getElementById('book-cover-status').textContent = '';
+  const thumb  = document.getElementById('book-cover-thumb');
+  const prompt = document.getElementById('book-cover-prompt');
+  thumb.src = ''; thumb.style.display = 'none';
+  prompt.style.display = 'block';
+  document.getElementById('book-cover-clear-btn').style.display = 'none';
+  document.getElementById('book-cover-progress').style.display  = 'none';
+  const fi = document.getElementById('book-cover-file-input');
+  if (fi) fi.value = '';
+}
+window.clearBookCover = clearBookCover;
+
+function toggleBookPayment() {
+  const sel = document.getElementById('book-access');
+  const grp = document.getElementById('book-price-group');
+  grp.style.display = sel.value === 'paid' ? 'block' : 'none';
+}
+window.toggleBookPayment = toggleBookPayment;
+
+function handleBookPdfDrop(e) {
+  e.preventDefault();
+  document.getElementById('book-pdf-dropzone').classList.remove('t-drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processBookPdf(file);
+}
+function handleBookPdfSelect(e) {
+  const file = e.target.files[0];
+  if (file) processBookPdf(file);
+}
+window.handleBookPdfDrop   = handleBookPdfDrop;
+window.handleBookPdfSelect = handleBookPdfSelect;
+
+async function processBookPdf(file) {
+  const statusEl = document.getElementById('book-pdf-status');
+  const progEl   = document.getElementById('book-pdf-progress');
+  const errEl    = document.getElementById('book-form-error');
+  if (errEl) { errEl.style.display='none'; errEl.textContent=''; }
+
+  if (file.type !== 'application/pdf') {
+    statusEl.style.color = '#C9544C'; statusEl.textContent = '✗ Please select a PDF file.'; return;
+  }
+
+  document.getElementById('book-pdf-filename').textContent = file.name;
+  document.getElementById('book-pdf-pct').textContent = '0%';
+  document.getElementById('book-pdf-bar').style.width = '0%';
+  progEl.style.display = 'block';
+
+  if (BOOK_CLOUD_NAME === 'YOUR_CLOUD_NAME') {
+    progEl.style.display = 'none';
+    statusEl.style.color = '#C9844C';
+    statusEl.textContent = '⚠ Cloudinary not configured. Paste the PDF URL manually below.';
+    return;
+  }
+
+  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'Uploading…';
+  try {
+    const url = await uploadToCloudinaryRaw(file, 'raw', (pct) => {
+      document.getElementById('book-pdf-pct').textContent = pct + '%';
+      document.getElementById('book-pdf-bar').style.width  = pct + '%';
+    });
+    setTimeout(() => (progEl.style.display='none'), 1200);
+    document.getElementById('book-pdf-url').value = url;
+    document.getElementById('book-pdf-url-input').value = url;
+    statusEl.style.color = '#7BC94C'; statusEl.textContent = '✓ PDF uploaded: ' + file.name;
+  } catch(e) {
+    progEl.style.display = 'none';
+    statusEl.style.color = '#C9544C'; statusEl.textContent = '✗ Upload failed: ' + e.message;
+    if (window.ErrorLog) window.ErrorLog.push(e, 'bookPdfUpload', e.stack||'');
+  }
+}
+
+async function uploadToCloudinaryRaw(file, resourceType, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', BOOK_UPLOAD_PRESET);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${BOOK_CLOUD_NAME}/${resourceType}/upload`);
+    xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded/e.total*100)); };
+    xhr.onload  = () => { const r = JSON.parse(xhr.responseText); if(xhr.status===200&&r.secure_url) resolve(r.secure_url); else reject(new Error(r.error?.message||'Upload failed')); };
+    xhr.onerror = () => reject(new Error('Network error'));
+    xhr.send(fd);
+  });
+}
+
+function clearBookForm() {
+  ['book-edit-id','book-title','book-author','book-desc','book-cover','book-pdf-url','book-pdf-url-input','book-price'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('book-access').value = 'free';
+  document.getElementById('book-price-group').style.display = 'none';
+  document.getElementById('book-pdf-progress').style.display = 'none';
+  document.getElementById('book-pdf-status').textContent = '';
+  // Reset cover widget
+  clearBookCover();
+  const errEl = document.getElementById('book-form-error'); if(errEl){errEl.style.display='none';}
+  const okEl  = document.getElementById('book-form-success'); if(okEl){okEl.style.display='none';}
+}
+window.clearBookForm = clearBookForm;
+
+// ============================================================
+//  TESTIMONY FILTER & PREVIEW (admin)
+// ============================================================
+let _tCurrentFilter = 'pending';
+
+window.filterTestimonies = function(filter) {
+  _tCurrentFilter = filter;
+  ['pending','approved','all'].forEach(f => {
+    const btn = document.getElementById('tfbtn-' + f);
+    if(btn) btn.classList.toggle('active', f === filter);
+  });
+  loadAdminData(); // reload list respecting filter
+};
+
+// Testimony preview popup
+window.openTPreview = function(dataJson) {
+  try {
+    const d = JSON.parse(decodeURIComponent(dataJson));
+    const ov = document.getElementById('t-preview-overlay');
+    if (!ov) return;
+    document.getElementById('tp-name').textContent    = d.name || '';
+    document.getElementById('tp-date').textContent    = d.date || '';
+    document.getElementById('tp-message').textContent = d.message || '';
+
+    const statusEl = document.getElementById('tp-status');
+    statusEl.textContent = d.approved ? '✓ Approved' : '⏳ Pending';
+    statusEl.style.color = d.approved ? '#7BC94C' : '#C9844C';
+
+    // Media
+    const mediaWrap = document.getElementById('tp-media-wrap');
+    mediaWrap.innerHTML = '';
+    if (d.mediaUrl) {
+      if (d.mediaType === 'image') {
+        mediaWrap.innerHTML = `<img src="${d.mediaUrl}" alt="attachment" style="max-width:100%;max-height:320px;object-fit:contain;border:1px solid rgba(201,168,76,0.2);">`;
+      } else if (d.mediaType === 'audio') {
+        mediaWrap.innerHTML = `<audio controls src="${d.mediaUrl}" style="width:100%;margin-top:0.5rem;"></audio>`;
+      } else if (d.mediaType === 'video') {
+        mediaWrap.innerHTML = `<video controls src="${d.mediaUrl}" style="width:100%;max-height:300px;border:1px solid rgba(201,168,76,0.15);"></video>`;
+      }
+    }
+
+    // Actions
+    const actionsEl = document.getElementById('tp-actions');
+    actionsEl.innerHTML = !d.approved
+      ? `<button class="save-btn" onclick="approveTestimony('${d.id}');closeTPreview();" style="margin-top:1.5rem;">✓ Approve Testimony</button>
+         <button class="clear-btn" onclick="deleteTestimony('${d.id}');closeTPreview();" style="margin-top:1.5rem;">Delete</button>`
+      : `<button class="clear-btn" onclick="deleteTestimony('${d.id}');closeTPreview();" style="margin-top:1.5rem;">Delete</button>`;
+
+    ov.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  } catch(e) { console.warn('tPreview error', e); }
+};
+
+window.closeTPreview = function() {
+  const ov = document.getElementById('t-preview-overlay');
+  if (ov) ov.classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+window._tCurrentFilter = 'pending';
+window._getTCurrentFilter = () => _tCurrentFilter;
+</script>
+</body>
+</html>
